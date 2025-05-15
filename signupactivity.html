@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng ký - Thư viện số</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .signup-container {
+      max-width: 370px;
+      margin: 60px auto;
+      background: #fff;
+      padding: 32px 24px;
+      border-radius: 10px;
+      box-shadow: 0 0 16px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .signup-container h2 {
+      margin-bottom: 24px;
+      color: #006699;
+    }
+    .signup-container input {
+      width: 80%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    .signup-container button {
+      width: 90%;
+      padding: 12px;
+      background: #006699;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .signup-container button:hover {
+      background: #005580;
+    }
+    .signup-container .login-link {
+      display: block;
+      margin-top: 18px;
+      color: #006699;
+      text-decoration: none;
+      font-size: 0.97rem;
+    }
+    .signup-container .login-link:hover {
+      text-decoration: underline;
+    }
+    .login-link-a {
+      color: #006699;
+      text-decoration: none;
+      font-size: 0.97rem;
+    }
+    .login-link-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-container">
+    <h2>Đăng ký tài khoản</h2>
+    <form>
+      <input type="text" id="username" placeholder="Tên đăng nhập" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Mật khẩu" required />
+      <input type="password" id="confirmpassword" placeholder="Nhập lại mật khẩu" required />
+      <button type="submit">Đăng ký</button>
+    </form>
+    <div class="login-link-row">
+        <p>Bạn đã có tài khoản?</p>
+        <a href="loginactivity.html" class="login-link-a">Đăng nhập</a>
+    </div>
+    
+  </div>
+</body>
+</html>
