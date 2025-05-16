@@ -81,3 +81,25 @@
   </div>
 </body>
 </html>
+<script>
+document.querySelector('form').onsubmit = function(e) {
+  e.preventDefault();
+  const username = document.getElementById('usernamelogin').value;
+  const password = document.getElementById('passwordlogin').value;
+  fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+  .then(async res => {
+    const data = await res.json();
+    if (res.ok) {
+      alert(data.message);
+      // Ví dụ: chuyển hướng về trang chủ sau khi đăng nhập thành công
+      window.location.href = "index.html";
+    } else {
+      alert(data.message);
+    }
+  });
+};
+</script>
