@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chi tiết sách</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="book-detail"></div>
+  <script>
+const params = new URLSearchParams(window.location.search);
+const id = params.get('id');
+
+fetch(`/api/books`)
+  .then(res => res.json())
+  .then(books => {
+    const book = books.find(b => b.id.toString() === id);
+    if (book) {
+      document.getElementById('book-detail').innerHTML = `
+        <h2>${book.title}</h2>
+        <img src="${book.image}" alt="${book.title}" style="max-width:300px"/>
+        <p><b>Tác giả:</b> ${book.author}</p>
+        <p>${book.description}</p>
+        <button>Mượn sách</button>
+      `;
+    } else {
+      document.getElementById('book-detail').textContent = "Không tìm thấy sách!";
+    }
+  })
+  .catch(err => {
+    console.error('Lỗi tải dữ liệu sách:', err);
+    document.getElementById('book-detail').textContent = "Lỗi tải dữ liệu.";
+  });
+</script>
+
+</body>
+</html>

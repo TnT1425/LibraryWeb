@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập - Thư viện số</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .login-container {
+      max-width: 350px;
+      max-height: 600px;
+      margin: 80px auto;
+      background: #fff;
+      padding: 20px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 16px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .login-container h2 {
+      margin-bottom: 24px;
+      color: #006699;
+    }
+    .login-container input {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    .login-container button {
+      width: 90%;
+      padding: 12px;
+      background: #006699;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .login-container button:hover {
+      background: #005580;
+    }
+    .login-container .register-link {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 18px;
+    }
+    .register-link-a {
+      color: #006699;
+      text-decoration: none;
+      font-size: 0.97rem;
+    }
+    .register-link-a:hover {
+      text-decoration: underline;
+    }
+    .login-container img {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <img src="image/logothuvien.jpg" alt="login-container" class="login-container img"/>
+    <h2>Đăng nhập</h2>
+    <form>
+      <input type="text" id="usernamelogin" placeholder="Tên đăng nhập" required />
+      <input type="password" id="passwordlogin" placeholder="Mật khẩu" required />
+      <button type="submit">Đăng nhập</button>
+    </form>
+    <div class="register-link">
+        <p>Chưa có tài khoản?</p>
+        <a href="signupactivity.html" class="register-link-a">Đăng ký</a>
+    </div>
+  </div>
+</body>
+</html>
+<script>
+document.querySelector('form').onsubmit = function(e) {
+  e.preventDefault();
+  const username = document.getElementById('usernamelogin').value;
+  const password = document.getElementById('passwordlogin').value;
+  fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  })
+  .then(async res => {
+    const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem('username', username);
+      alert(data.message);
+      // Ví dụ: chuyển hướng về trang chủ sau khi đăng nhập thành công
+      window.location.href = "index.html";
+    } else {
+      alert(data.message);
+    }
+  });
+};
+</script>

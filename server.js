@@ -1,44 +1,91 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
+const { sql, poolPromise } = require('./db.js');
+
 const app = express();
 const PORT = 3000;
 
-const users = require('./users');
-
-// Cho phép phục vụ file tĩnh (frontend)
-app.use(express.static(__dirname));
+app.use(express.static('public'));
 app.use(express.json());
 
-// API mẫu: Lấy danh sách sách
-app.get('/api/books', (req, res) => {
-  res.json([
-    { id: 1, title: "Hãy nhớ tên anh ấy", author: "Trần Hồng Quân" },
-    { id: 2, title: "Những chú chim tí hon", author: "Phan Vàng Anh" },
-    { id: 3, title: "Nhà Giả Kim", author: "Paulo Coelho" }
-  ]);
+// API: Lấy danh sách sách
+app.get('/api/books', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query('SELECT * FROM Books');
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('Lỗi truy vấn:', err);
+    res.status(500).json({ message: 'Lỗi truy vấn!' });
+  }
 });
 
-// Đăng ký
-app.post('/api/register', (req, res) => {
+// API: Đăng ký người dùng mới
+app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
-  if (users.find(u => u.username === username)) {
-    return res.status(400).json({ message: 'Tên đăng nhập đã tồn tại' });
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: 'Thiếu thông tin' });
   }
-  users.push({ username, email, password });
-  res.json({ message: 'Đăng ký thành công' });
+
+  try {
+    const pool = await poolPromise;
+    const check = await pool
+      .request()
+      .input('username', sql.VarChar, username)
+      .query('SELECT COUNT(*) AS count FROM users WHERE username = @username');
+
+    if (check.recordset[0].count > 0) {
+      return res.status(400).json({ message: 'Tên đăng nhập đã tồn tại!' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await pool
+      .request()
+      .input('username', sql.VarChar, username)
+      .input('email', sql.VarChar, email)
+      .input('password', sql.VarChar, hashedPassword)
+      .query('INSERT INTO users (username, email, password) VALUES (@username, @email, @password)');
+
+    res.json({ message: 'Đăng ký thành công!' });
+  } catch (err) {
+    console.error('Lỗi đăng ký:', err);
+    res.status(500).json({ message: 'Lỗi máy chủ!' });
+  }
 });
 
-// Đăng nhập
-app.post('/api/login', (req, res) => {
+// API: Đăng nhập
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
-  const user = users.find(u => u.username === username && u.password === password);
-  if (!user) {
-    return res.status(401).json({ message: 'Sai tên đăng nhập hoặc mật khẩu' });
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Thiếu thông tin đăng nhập' });
   }
-  res.json({ message: 'Đăng nhập thành công' });
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input('username', sql.VarChar, username)
+      .query('SELECT password FROM users WHERE username = @username');
+
+    if (result.recordset.length === 0) {
+      return res.status(401).json({ message: 'Sai tên đăng nhập hoặc mật khẩu' });
+    }
+
+    const hashedPassword = result.recordset[0].password;
+    const isMatch = await bcrypt.compare(password, hashedPassword);
+
+    if (isMatch) {
+      res.json({ message: 'Đăng nhập thành công' });
+    } else {
+      res.status(401).json({ message: 'Sai tên đăng nhập hoặc mật khẩu' });
+    }
+  } catch (err) {
+    console.error('Lỗi đăng nhập:', err);
+    res.status(500).json({ message: 'Lỗi máy chủ!' });
+  }
 });
-
-
 
 app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`✅ Server is running at http://localhost:${PORT}`);
 });
