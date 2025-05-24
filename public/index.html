@@ -33,62 +33,57 @@
     <p>Tìm kiếm và mượn sách trực tuyến một cách dễ dàng</p>
   </section>
 
-  <!-- Search Section -->
-  <section class="search-section">
-    <input type="text" placeholder="Nhập tên sách, tác giả..." />
-    <button>Tìm kiếm</button>
-  </section>
+  
 
+  <section class="search-section">
+    <div class="search-container">
+        <input type="text" 
+               id="dbSearchInput" 
+               placeholder="Tìm kiếm sách, tác giả..." 
+               autocomplete="off" />
+        <button id="dbSearchButton">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                      fill="#4285f4"/>
+            </svg>
+        </button>
+    </div>
+</section>
+  
   <!-- Featured Books -->
   <section class="featured-books">
     <h2>Sách nổi bật</h2>
-    <div class="book-list" id="book-list">
-    </div>
+    <div class="book-list" id="book-list"></div>
+    <div class="pagination" id="pagination"></div>
   </section>
+
 
   <!-- Footer -->
   <footer class="footer">
     <p>© 2025 Thư viện số. All rights reserved.</p>
   </footer>
 
+  <script src="auth.js"></script>
+  <script src="pagination.js"></script>
+  <script src="book.js"></script>
   <script>
-  window.onload = function() {
-  // Đăng nhập/đăng xuất
-  const username = localStorage.getItem('username');
-  if (username) {
-    document.getElementById('login-link').style.display = 'none';
-    document.getElementById('register-link').style.display = 'none';
-    document.getElementById('user-info').style.display = 'flex';
-    document.getElementById('user-name').textContent = username;
-  }
-  document.getElementById('logout-btn').onclick = function() {
-    localStorage.removeItem('username');
-    window.location.reload();
-  };
+  async function searchBook() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return alert("Vui lòng nhập từ khóa!");
 
-  // Tải sách từ API
-  fetch('/api/books')
-    .then(res => res.json())
-    .then(books => {
-      const container = document.getElementById('book-list');
-      books.forEach(book => {
-        const card = document.createElement('div');
-        card.className = 'book-card';
-        card.setAttribute('data-id', book.id);
-        card.innerHTML = `
-          <img src="${book.image}" alt="${book.title}" class="book-img" />
-          <h3>${book.title}</h3>
-          <p>Tác giả: ${book.author}</p>
-        `;
-        card.onclick = function() {
-          window.location.href = `bookdetail.html?id=${book.id}`;
-        };
-        container.appendChild(card);
-      });
-    });
-};
+  const res = await fetch(`/api/book?q=${encodeURIComponent(q)}`);
+  const data = await res.json();
+
+  if (res.ok) {
+    alert("✅ Đã tìm thấy và thêm sách: " + data.title);
+    location.reload(); // Tải lại để xem sách mới
+  } else {
+    alert("❌ " + data.message);
+  }
+}
 </script>
 
+  
 
 </body>
 </html>

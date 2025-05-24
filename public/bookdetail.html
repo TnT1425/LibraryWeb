@@ -4,34 +4,164 @@
   <meta charset="UTF-8" />
   <title>Chi tiết sách</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- CSS của bạn từ file gốc -->
+  <style>
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.book-detail-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 30px;
+  display: flex;
+  gap: 30px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.book-detail-img {
+  width: 300px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.book-detail-info {
+  flex: 1;
+  min-width: 280px;
+}
+
+.book-detail-title {
+  font-size: 2rem;
+  color: #006699;
+  margin-bottom: 10px;
+}
+
+.book-detail-author {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.book-detail-info p {
+  margin: 6px 0;
+  font-size: 1rem;
+}
+
+.book-detail-desc {
+  margin-top: 20px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.book-detail-btns {
+  margin-top: 30px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.book-detail-btns .btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #006699;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.book-detail-btns .btn:hover {
+  background-color: #004d66;
+}
+
+  </style>
 </head>
 <body>
-  <div id="book-detail"></div>
+  <div id="book-detail-content">
+      <!-- Nội dung chi tiết sách sẽ được chèn vào đây -->
+  </div>
   <script>
-const params = new URLSearchParams(window.location.search);
-const id = params.get('id');
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const source = params.get('source') || 'db'; // Mặc định là 'db' nếu không có 'source'
+    const bookDetailContainer = document.getElementById('book-detail-content');
 
-fetch(`/api/books`)
-  .then(res => res.json())
-  .then(books => {
-    const book = books.find(b => b.id.toString() === id);
-    if (book) {
-      document.getElementById('book-detail').innerHTML = `
-        <h2>${book.title}</h2>
-        <img src="${book.image}" alt="${book.title}" style="max-width:300px"/>
-        <p><b>Tác giả:</b> ${book.author}</p>
-        <p>${book.description}</p>
-        <button>Mượn sách</button>
-      `;
+    if (!id) {
+      bookDetailContainer.innerHTML = "<p style='color:red; text-align:center; margin-top: 50px;'>Không tìm thấy ID sách trong URL!</p>";
     } else {
-      document.getElementById('book-detail').textContent = "Không tìm thấy sách!";
-    }
-  })
-  .catch(err => {
-    console.error('Lỗi tải dữ liệu sách:', err);
-    document.getElementById('book-detail').textContent = "Lỗi tải dữ liệu.";
-  });
-</script>
+      let apiUrl = '';
+      if (source === 'google') {
+        apiUrl = `/api/google-books/${encodeURIComponent(id)}`; // ID từ Google có thể cần encode
+      } else { // Mặc định hoặc source === 'db'
+        apiUrl = `/api/books/${id}`; // Giả sử ID từ DB không cần encode đặc biệt
+      }
 
+      bookDetailContainer.innerHTML = "<p style='text-align:center; margin-top: 50px;'>Đang tải chi tiết sách...</p>";
+
+      fetch(apiUrl)
+        .then(res => {
+          if (!res.ok) {
+            if (res.status === 404) throw new Error('Sách không tìm thấy.');
+            // Cố gắng parse lỗi JSON từ server nếu có
+            return res.json().then(errData => {
+                throw new Error(errData.message || `Lỗi HTTP: ${res.status}`);
+            }).catch(() => { // Nếu parse JSON lỗi (vd: server trả text)
+                throw new Error(`Lỗi HTTP: ${res.status}`);
+            });
+          }
+          return res.json();
+        })
+        .then(book => {
+          if (typeof book !== 'object' || book === null) {
+              throw new Error('Dữ liệu sách không hợp lệ nhận từ API.');
+          }
+          const title = book.title || "Không có tiêu đề";
+          // Google trả về authors là mảng, DB của bạn có thể là chuỗi 'author'
+          const author = book.author || (book.authors && Array.isArray(book.authors) ? book.authors.join(', ') : "Không rõ tác giả");
+          const image = book.image || (book.imageLinks && book.imageLinks.thumbnail) || 'image/default-book.png'; // Ưu tiên image đã xử lý, sau đó đến imageLinks
+          const description = book.description || "Chưa có mô tả cho sách này.";
+          const publishedDate = book.publishedDate || "N/A";
+          const publisher = book.publisher || "N/A";
+          const pageCount = book.pageCount || "N/A";
+          const categories = book.categories || "N/A";
+
+
+          bookDetailContainer.innerHTML = `
+            <div class="book-detail-container">
+              <img src="${image}" alt="${title}" class="book-detail-img"/>
+              <div class="book-detail-info">
+                <h2 class="book-detail-title">${title}</h2>
+                <div class="book-detail-author"><b>Tác giả:</b> ${author}</div>
+                <p><strong>Ngày xuất bản:</strong> ${publishedDate}</p>
+                <p><strong>Nhà xuất bản:</strong> ${publisher}</p>
+                <p><strong>Số trang:</strong> ${pageCount}</p>
+                <p><strong>Thể loại:</strong> ${categories}</p>
+                <div class="book-detail-desc"><b>Mô tả:</b><br>${description.replace(/\n/g, '<br>')}</div>
+                <div class="book-detail-btns">
+                  <button class="btn" onclick="window.history.back()">Quay lại</button>
+                  <button class="btn" id="borrow-btn">Mượn sách</button>
+                  <button class="btn" ">Thêm vào giỏ</button>
+                </div>
+              </div>
+            </div>
+          `;
+          // Bạn có thể thêm EventListener cho nút 'Mượn sách' ở đây
+          // document.getElementById('borrow-btn').addEventListener('click', () => { /* Xử lý mượn sách */ });
+        })
+        .catch(err => {
+          console.error('Lỗi tải dữ liệu chi tiết sách:', err);
+          bookDetailContainer.innerHTML = `<p style='color:red; text-align:center; margin-top: 50px;'>Lỗi tải dữ liệu sách: ${err.message}</p>`;
+        });
+    }
+  </script>
 </body>
 </html>

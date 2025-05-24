@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-blue-800 text-white flex flex-col">
+            <div class="p-6 text-2xl font-bold border-b border-blue-700">
+                <img src="image/logothuvien.jpg" alt="Logo" class="h-12 w-12 inline-block mr-2">
+                Thư viện số
+            </div>
+            <nav class="flex-1 p-4">
+                <ul class="space-y-3">
+                    <li>
+                        <button onclick="switchTab('books')" class="w-full text-left p-2 hover:bg-blue-700 rounded tab-btn" data-tab="books">
+                            📘 Quản lý sách
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="switchTab('users')" class="w-full text-left p-2 hover:bg-blue-700 rounded tab-btn" data-tab="users">
+                            👥 Quản lý người dùng
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="switchTab('borrows')" class="w-full text-left p-2 hover:bg-blue-700 rounded tab-btn" data-tab="borrows">
+                            📄 Quản lý mượn/trả
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="switchTab('stats')" class="w-full text-left p-2 hover:bg-blue-700 rounded tab-btn" data-tab="stats">
+                            📊 Thống kê
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t border-blue-700">
+                <button class="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">
+                    Đăng xuất
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <!-- Tab content -->
+            <div id="books-tab" class="tab-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold">Quản lý sách</h1>
+                    <button onclick="openAddBookModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Thêm sách mới
+                    </button>
+                </div>
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <!-- Bảng sách ở đây -->
+                    </table>
+                </div>
+            </div>
+
+            <div id="users-tab" class="tab-content hidden">
+                <h1 class="text-3xl font-bold mb-6">Quản lý người dùng</h1>
+                <div class="bg-white rounded-xl shadow overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <!-- Bảng người dùng ở đây -->
+                    </table>
+                </div>
+            </div>
+
+            <div id="borrows-tab" class="tab-content hidden">
+                <h1 class="text-3xl font-bold mb-6">Quản lý mượn/trả</h1>
+                <!-- Content cho tab mượn/trả -->
+            </div>
+
+            <div id="stats-tab" class="tab-content hidden">
+                <h1 class="text-3xl font-bold mb-6">Thống kê</h1>
+                <!-- Content cho tab thống kê -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Thêm script để xử lý tab -->
+    <script>
+        function switchTab(tabName) {
+            // Ẩn tất cả các tab content
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Hiển thị tab được chọn
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+            
+            // Highlight tab button được chọn
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.add('bg-blue-700');
+                } else {
+                    btn.classList.remove('bg-blue-700');
+                }
+            });
+
+            // Load dữ liệu cho tab tương ứng
+            switch(tabName) {
+                case 'books':
+                    loadBooks();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'borrows':
+                    loadBorrows();
+                    break;
+                case 'stats':
+                    loadStats();
+                    break;
+            }
+        }
+
+        // Load tab mặc định khi trang được tải
+        document.addEventListener('DOMContentLoaded', function() {
+            switchTab('books');
+        });
+    </script>
+
+    <!-- Include các file JS riêng cho từng chức năng -->
+    <script src="admin_books.js"></script>
+    <script src="admin_users.js"></script>
+    <script src="admin_borrowreturn.js"></script>
+    <script src="admin_stats.js"></script>
+</body>
+</html>
